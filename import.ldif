@@ -1,0 +1,64 @@
+dn: dc=example,dc=com
+objectclass: dcObject
+objectclass: organization
+o: ESO-google
+dc: example
+
+dn: ou=people, dc=example,dc=com
+ou: people
+description: All people in organisation
+objectclass: organizationalunit
+
+dn: ou=groups, dc=example,dc=com
+ou: groups
+description: All groups in organisation
+objectclass: organizationalunit
+
+dn: cn=user1,ou=people, dc=example,dc=com
+labeledURI: http://www.google.com
+givenName: user1
+sn: user1
+telephoneNumber: x105
+userPassword: {SHA}kd/Z3bQZiv/FwZTNjObTOP3kcOI=
+displayName: user1
+mail: user1@example.com
+uid: user1
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+homePhone: 401-555-1234
+cn: user1
+title: GSA
+description: user1 account
+
+dn: cn=user2,ou=people, dc=example,dc=com
+labeledURI: http://www.google.com
+givenName: user2
+sn: user2
+telephoneNumber: x105
+userPassword: {SHA}kd/Z3bQZiv/FwZTNjObTOP3kcOI=
+displayName: user2
+mail: user2@example.com
+uid: user2
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+homePhone: 401-555-1234
+cn: user2
+description: useraccount
+
+dn: cn=finance, ou=groups, dc=example,dc=com
+cn: finance
+description: finance@example.com
+objectclass: groupofuniquenames
+uniqueMember: cn=user1,ou=people, dc=example,dc=com
+
+dn: cn=engineering, ou=groups, dc=example,dc=com
+cn: engineering
+objectclass: groupofuniquenames
+description: engineering@example.com
+uniqueMember: cn=user1,ou=people, dc=example,dc=com
+uniqueMember: cn=user2,ou=people, dc=example,dc=com
+
