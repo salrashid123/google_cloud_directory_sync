@@ -2,11 +2,11 @@
 
 
 ## Introduction
-Tutorial on how to provision users and groups from a local LDAP server (OpenLDAP) into your G-suites domain.  Any users and groups present in your local LDAP server will get created in G-suites.  Once your users are present in your G-suites domain, you can authorize these users and groups access to Google Cloud Resources and other G-suites features.
+This is a tutorial on how to provision users and groups from a local LDAP server (OpenLDAP) into your G Suite domain.  Any users and groups present in your local LDAP server will get created in G Suite.  Once your users are present in your G Suite domain, you can authorize these users and groups access to Google Cloud Resources and other G Suite features.
 
-This article is simply a tutorial on the simplified steps you would take for your on-prem directory server (ActiveDirectory, OpenLDAP).  The Directory Sync utility overwrites any existing G-suites users and groups in favor of your local LDAP.    As this is just a tutorial, only execute the 'dry-run' capabilities.  You will need Domain Admin user privileges to your G-suites domain.
+This article is simply a tutorial on the simplified steps you would take for your on-prem directory server (ActiveDirectory, OpenLDAP).  The Directory Sync utility overwrites any existing G Suite users and groups in favor of your local LDAP.    As this is just a tutorial, only execute the 'dry-run' capabilities.  You will need Domain Admin user privileges to your G Suite domain.
 
-This sample will only sync the basic Users and Groups objects from your LDAP to G-suites.
+This sample will only sync the basic Users and Groups objects from your LDAP to G Suite.
 
 Some references on the Directory Sync tool:
 * [https://support.google.com/a/answer/106368?hl=en](https://support.google.com/a/answer/106368?hl=en)
@@ -20,22 +20,22 @@ If you are a Google Cloud Platform user, consider migrating your organization af
 
 
 ## OpenLDAP configuration
-This tutorial run a Docker container with a configurable OpenLDAP server that you can setup and load sample data reflecting your LDAP hierarchy.   The the sample LDIF file is very basic and enables the domain  dc=example, dc=com with users under ou=users and groups under ou=groups
+This tutorial runs a Docker container with a configurable OpenLDAP server that you can setup and load sample data reflecting your LDAP hierarchy.   The the sample LDIF file is very basic and enables the domain  `dc=example`, `dc=com` with users under `ou=users` and groups under `ou=groups`.
 
-You can edit the slapd.conf file and import.ldif file to map to your users and directory structure.  You will need to initialize and load the LDIF files once the container starts up as shown below
+You can edit the `slapd.conf` file and `import.ldif` file to map to your users and directory structure.  You will need to initialize and load the LDIF files once the container starts up as shown below.
 
-** NOTE:  I've made some specific modifications to the objectclass mappings for a users groups display name for simplicity **
+**NOTE:  I've made some specific modifications to the objectclass mappings for a users groups display name for simplicity.**
 
 
 ### Download the sample Dockerfile and LDAP configuration
-* [Dockerfile](Dockerfile)
+* [`Dockerfile`](Dockerfile)
 Initializes a plain OpenLDAP server on secure (ldaps://) and insecure (ldap://) ports.
-* [slapd.conf](exportvolume/slapd.conf)
+* [`slapd.conf`](exportvolume/slapd.conf)
 OpenLDAP configuration that defines the root password, baseDN and ACLs to apply
-* [import.ldif](import.ldif)
+* [`import.ldif`](import.ldif)
 Sample users and groups
-* [CA_crt.pem](exportvolume/CA_crt.pem), [ldap_crt.pem](exportvolume/ldap_crt.pem), [ldap_key.pem](exportvolume/ldap_key.pem)
-Self-signed certificate and chain for ldaps://
+* [`CA_crt.pem`](exportvolume/CA_crt.pem), [`ldap_crt.pem`](exportvolume/ldap_crt.pem), [`ldap_key.pem`](exportvolume/ldap_key.pem)
+Self-signed certificate and chain for `ldaps://`
 
 ### Start the LDAP server
 The first step is to setup the local LDAP server.  You will need to clone the gitrepo to aquire the sample Dockerfile and ldap configurations.
@@ -50,7 +50,7 @@ docker build -t myldap .
 docker run -p 1389:389 -p 1636:636 myldap slapd  -h "ldap://0.0.0.0:389  ldaps://0.0.0.0:636" -d 3 -f /ldap/slapd.conf
 ```
 
-##### Install LDAP utilities on the host
+#### Install LDAP utilities on the host
 Either:
 Install some LDAP utilities you will need on the docker host
 ```
@@ -66,7 +66,7 @@ Alternatively, you can install an LDAP UI like [Apache Directory Studio](https:/
 ```
 ldapadd -v -x -D "cn=admin,dc=example,dc=com" -w mypassword  -H ldap://localhost:1389 -f import.ldif 
 ```
-If you used Apache Directory Studio, you can load and execute the .ldif file directly ("LDAP-->New LDIF FIle") after you establish a connection:
+If you used Apache Directory Studio, you can load and execute the `.ldif` file directly ("LDAP-->New LDIF FIle") after you establish a connection:
 ![Directory Studio](images/apache_ds.png)
 
 ##### Verify via query
@@ -92,11 +92,11 @@ You need to be domain super user to syn and run this utility:
 
 #### Connect to the LDAP server
 
-Connect as __cn=admin,dc=example,dc=com__.  The default password is __mypassword__
+Connect as `cn=admin,dc=example,dc=com` .  The default password is `mypassword` .
 
 ![LDAP Config](images/2_ldap_config.png)
 
-If you are using ldaps://, you need to add in the certificate chain first:
+If you are using `ldaps://`, you need to add in the certificate chain first:
 
 ```
 cd GoogleCloudDirSync/jre
@@ -110,18 +110,18 @@ $ keytool -keystore lib/security/cacerts -storepass changeit -import -file path_
 
 #### User Configuration 
 
-I've made some specific maps for LDAP attributes to G-suites attributes:
+I've made some specific maps for LDAP attributes to G Suite attributes:
 
-* cn -> Unique identifer attribute 
-* mail -> email address to use
-* givenName -> Users Firstname
-* sn -> Users Lastname
-* userPassword -> SHA1 format for the users local LDAP password
+* `cn` -> Unique identifer attribute 
+* `mail` -> Email address to use
+* `givenName` -> User's first name
+* `sn` -> User's last name
+* `userPassword` -> SHA1 format for the user's local LDAP password
 
 ![User Config](images/2_user_accounts.png)
 
 
-The users in LDAP are found under __ou=People,dc=example,dc=com__  and the primary identifier is __cn__
+The users in LDAP are found under `ou=People,dc=example,dc=com`  and the primary identifier is `cn`
 ![User Attributes](images/2a_user_additional_attributes.png)
 
 
@@ -136,12 +136,12 @@ slappasswd -h  {SHA} -s mypassword
 
 #### Groups Configuration
 
-I did not want to override the default openldap schema so I ended up using the __description__ attribute of __objectclass: groupofuniquenames__
+I did not want to override the default openldap schema so I ended up using the `description` attribute of `objectclass: groupofuniquenames`
 as the attribute the utility will use to infer the Group Email Address:
 
-* Group Email Address Attribute:  __description__
+* Group Email Address Attribute:  `description`
 
-Meaning the LDAP's description field for a groupofuniquenames denotes the email address to provision in G-suites.
+Meaning the LDAP's description field for a groupofuniquenames denotes the email address to provision in G Suite.
 
 You can search for the groups by looking in the subtree for:
 ```
@@ -181,7 +181,7 @@ see them in the Google Apps domain console.
 
 Note, the setup does not sync or overwrite the domain admin users.
 
-You can also backup/export your existing users list first to a .csv file prior to running the full sync.
+You can also backup/export your existing users list first to a `.csv` file prior to running the full sync.
 
 ![Apps Users](images/7_app_users.png)
 
@@ -298,7 +298,7 @@ Modify group 2: "finance@example.com"
 
 ## Directory Sync via Admin API
 
-You can also script the provisioning and management of users and groups via the G-suites APIs such as 
+You can also script the provisioning and management of users and groups via the G Suite APIs such as 
 [Directory API](https://developers.google.com/admin-sdk/directory/v1/guides/manage-users)
 
 ```python
